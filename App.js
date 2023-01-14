@@ -1,6 +1,6 @@
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View, ImageBackground,SafeAreaView, Image, PanResponder, Animated, Dimensions } from 'react-native';
-import Svg, { Circle, Path, Defs, Stop, LinearGradient } from 'react-native-svg';
+import Svg, { Circle, Path, Defs, Stop, LinearGradient,Polygon } from 'react-native-svg';
 import bc from './assets/bc.png'
 import bcCard from './assets/bc-card.png'
 import bcBottom from './assets/bc-bottom.png'
@@ -8,9 +8,22 @@ import userPic from './assets/userPic.png';
 import { useRef } from 'react';
 import usersData from './usersData';
 import React, {useState, useEffect} from 'react';
+import { useFonts } from 'expo-font';
+
 const {width: windowWidth, height: windowHeight} = Dimensions.get('window');
 
 export default function App() {
+
+
+  const [fontsLoaded] = useFonts({
+    'Inter': require('./assets/fonts/Inter-Regular.ttf'),
+    'JosefinSansLight': require('./assets/fonts/JosefinSans-Light.ttf'),
+    'JosefinSansMedium': require('./assets/fonts/JosefinSans-Medium.ttf'),
+  })
+
+  console.log(fontsLoaded)
+
+  const [isChoise, setIsChoise] = useState(null)
 
 
   const swipeRight = () => {
@@ -50,6 +63,17 @@ export default function App() {
   };
 
 
+  const approvedCard = ()=>{
+    setIsChoise(true)
+    setTimeout(()=>setIsChoise(null), 500)
+  }
+
+  const declineCard = ()=>{
+    setIsChoise(false)
+    setTimeout(()=>setIsChoise(null), 500)
+
+  }
+
 
 
   const panResponder = useRef(
@@ -61,8 +85,11 @@ export default function App() {
       onPanResponderRelease: (event, gesture) => {
         if (gesture.dx > windowWidth * 0.25) {
           swipeRight();
+          approvedCard();
         } else if (gesture.dx < -windowWidth * 0.25) {
           swipeLeft();
+          declineCard();
+
         } else {
           resetPosition();
         }
@@ -182,6 +209,22 @@ export default function App() {
             </SafeAreaView>
            
             <View style={styles.cardsBlock} {...panResponder.panHandlers}>
+                {isChoise === true ? 
+                <View style={styles.choiseItem}>
+                <Svg fill="#aaf683" width="150px" height="150px" viewBox="0 0 24 24"><Path d="M12,1A11,11,0,1,0,23,12,11.013,11.013,0,0,0,12,1Zm0,20a9,9,0,1,1,9-9A9.011,9.011,0,0,1,12,21ZM17.737,8.824a1,1,0,0,1-.061,1.413l-6,5.5a1,1,0,0,1-1.383-.03l-3-3a1,1,0,0,1,1.415-1.414l2.323,2.323,5.294-4.853A1,1,0,0,1,17.737,8.824Z"/></Svg></View> 
+                :
+                 isChoise === false?
+                 <View style={styles.choiseItem}>
+                  <Svg fill="#e63946" version="1.1" id="Layer_1" 
+                    width="150px" height="150px" viewBox="0 0 512 512" enableBackground="new 0 0 512 512">
+                  <Polygon points="335.188,154.188 256,233.375 176.812,154.188 154.188,176.812 233.375,256 154.188,335.188 176.812,357.812 
+                    256,278.625 335.188,357.812 357.812,335.188 278.625,256 357.812,176.812 "/>
+                  <Path d="M256,0C114.609,0,0,114.609,0,256s114.609,256,256,256s256-114.609,256-256S397.391,0,256,0z M256,472
+                    c-119.297,0-216-96.703-216-216S136.703,40,256,40s216,96.703,216,216S375.297,472,256,472z"/>
+                  </Svg>
+                 </View>
+                   :
+                    ''}
                 {renderCards()}
             </View>
 
@@ -263,7 +306,7 @@ const styles = StyleSheet.create({
   headerContent: {paddingTop: 15,paddingLeft: 15, paddingRight:15,marginBottom: 30, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexDirection: 'row', width: '80%'},
   userPic: {width: 46, height: 46},
   xHead: {width: 46, height: 46, display: 'flex', alignItems: 'center', justifyContent: 'center'},
-  cardsBlock: {position:'relative',paddingLeft:15, paddingRight: 15,width:'100%', height:500},
+  cardsBlock: {position:'relative',display:'flex',alignItems:'center',justifyContent:'center',paddingLeft:15, paddingRight: 15,width:'100%', height:500},
   footerBc: {height:100, width: '100%', display:'flex', justifyContent: 'center'},
   footerWrapper: { paddingLeft:23, paddingRight:23,display:'flex', alignItems:'center', justifyContent:'space-between', flexDirection:'row'},
   cardContent: { position:'absolute',top:0,left:15, display:'flex',justifyContent:'space-between',height:500, width:'100%', backgroundColor: '#E3D9F3', borderRadius: 20,   shadowColor: '#C0AEDE',
@@ -273,13 +316,13 @@ const styles = StyleSheet.create({
   cardInitials: {display:'flex', justifyContent:'center',width:140, alignItems:'start'},
   cardHead: {display:'flex', flexDirection:'row', justifyContent:'space-between'},
   avatar: {width:150, height:150, borderRadius: 30},
-  cardFIO: {fontFamily: 'Josefin Sans',
+  cardFIO: {fontFamily: 'JosefinSansMedium',
   fontStyle: 'normal',
   fontWeight: '500',
   fontSize: 26,
   lineHeight: 26,
   color: '#3C005F'},
-  cardPost: {fontStyle: "normal",
+  cardPost: {fontFamily:'JosefinSansLight',fontStyle: "normal",
     fontWeight: "300",
     fontSize: 22,
     lineHeight: 22,
@@ -295,7 +338,7 @@ const styles = StyleSheet.create({
   marginBottom:15
   },
   portTitle: {
-    fontFamily: 'Josefin Sans',
+    fontFamily: 'JosefinSansLight',
   fontStyle: "normal",
   fontWeight: "300",
   fontSize: 22,
@@ -319,12 +362,18 @@ const styles = StyleSheet.create({
   portfolioViewText: {
     fontFamily: 'Inter',
 fontStyle: "normal",
-fontWeight: "200",
+fontWeight: "400",
 fontSize: 15,
 lineHeight: 18,
 display: "flex",
 textAlign: "center",
 textTransform: "lowercase",
 color: "#64009E",
+  },
+  choiseItem: {
+    position: 'relative',
+    top:0,left:0,right:0,bottom:0,
+    margin:'auto',
+    zIndex: 10,
   }
 });
